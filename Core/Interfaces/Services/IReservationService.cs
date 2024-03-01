@@ -10,10 +10,6 @@ namespace Core.Interfaces.Services
 
         Task<MainResponse<ReservationResponse>> AddReservation(ReservationRequest reservationRequest, PlaneEntity plane);
 
-        Task<ReservationEntity> AddPassengersList(ReservationEntity reservation, ICollection<PassengerRequest> passengerRequests);
-
-        bool DoesPassengerHaveTheSameReservation(PassengerEntity passenger, ReservationEntity reservation);
-
         bool IsPlaneAvailable(PlaneEntity plane);
 
         bool IsPlaneSeatsSufficients(ReservationRequest reservationRequest, PlaneEntity plane);

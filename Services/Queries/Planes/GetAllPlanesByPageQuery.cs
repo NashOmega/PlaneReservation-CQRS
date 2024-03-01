@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Core.Queries.Planes
 {
-    public class GetAllPlanesByPageQuery : IRequest<IEnumerable<PlaneResponse>>
+    public record GetAllPlanesByPageQuery : IRequest<IEnumerable<PlaneResponse>>
     {
         public int Page {  get;}
         public int Size { get;}

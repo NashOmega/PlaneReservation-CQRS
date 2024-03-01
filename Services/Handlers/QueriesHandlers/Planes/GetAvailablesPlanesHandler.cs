@@ -5,7 +5,7 @@ using Core.Queries.Planes;
 using Core.Response;
 using MediatR;
 
-namespace Core.handlers.planes
+namespace Services.Handlers.QueriesHandlers.Planes
 {
     public class GetAvailablesPlanesHandler : IRequestHandler<GetAvailablesPlanesQuery, IEnumerable<PlaneResponse>>
     {

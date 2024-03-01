@@ -69,13 +69,5 @@ namespace Core.Interfaces.Services
         /// </returns>
         Task<MainResponse<bool>> DeletePlane(int id);
 
-        /// <summary>
-        /// Checks if a plane with the same attributes as the provided plane exists in the database.
-        /// </summary>
-        /// <param name="plane">The plane entity to compare against existing planes.</param>
-        /// <returns cref="bool">
-        /// True if a plane matching the provided criteria exists in the database, otherwise false.
-        /// </returns>
-        Task<bool> IsPlaneExists(PlaneEntity plane);
     }
 }

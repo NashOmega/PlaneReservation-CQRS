@@ -1,9 +1,9 @@
-﻿using Core.Response;
+﻿using Core.Entities;
 using MediatR;
 
 namespace Core.Queries.Planes
 {
-    public class GetPlaneByIdQuery : IRequest<PlaneResponse?>
+    public class GetPlaneByIdQuery : IRequest<PlaneEntity?>
     {
         public int PlaneId {  get;}
 

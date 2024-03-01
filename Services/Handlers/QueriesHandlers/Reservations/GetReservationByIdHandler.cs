@@ -5,7 +5,7 @@ using Core.Queries.Planes;
 using Core.Response;
 using MediatR;
 
-namespace Core.handlers.planes
+namespace Services.Handlers.Queries.Reservations
 {
     public class GetReservationByIdHandler : IRequestHandler<GetReservationByIdQuery, ReservationResponse?>
     {

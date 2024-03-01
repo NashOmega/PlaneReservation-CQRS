@@ -1,10 +1,12 @@
-﻿using Api.Controllers;
+﻿
 using Core.Interfaces.Repository;
 using Core.Interfaces.SeedDatabase;
 using Core.Interfaces.Services;
+using MediatR;
 using Repository;
 using Services;
 using Services.Seed;
+using System;
 
 namespace Api.Configuration
 {
@@ -18,10 +20,9 @@ namespace Api.Configuration
 
             services.AddScoped<IPlaneService, PlaneService>();
             services.AddScoped<IReservationService, ReservationService>();
-            services.AddScoped<IPassengerService, PassengerService>();
 
             services.AddScoped<IInitSeedService, InitSeedService>();
-
+            services.AddMediatR(Cfg => Cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
         }
     }
 }

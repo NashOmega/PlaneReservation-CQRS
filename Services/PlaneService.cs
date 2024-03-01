@@ -1,28 +1,27 @@
 ﻿using AutoMapper;
-using Core.Entities;
-using Core.Interfaces.Repository;
 using Core.Interfaces.Services;
 using Core.Queries.Planes;
 using Core.Request;
 using Core.Response;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Services.Commands.Planes;
+using Services.Queries.Planes;
 
 namespace Services
 {
     public class PlaneService : ServiceBase<PlaneService>, IPlaneService
     {
-
-
         private readonly IMediator _mediator;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaneService"/> class.
         /// </summary>
         /// <param name="planeRepository">The repository for managing plane data.</param>
         /// <param name="mapper">The mapper for object mapping.</param>
         /// <param name="logger">The logger for logging messages.</param>
-        public PlaneService(IUnitOfWork unitOfWork, IMapper mapper, ILoggerFactory factory, IMediator mediator)
-            : base(unitOfWork, mapper, factory)
+        public PlaneService(IMapper mapper, ILoggerFactory factory, IMediator mediator)
+            : base(mapper, factory)
         {
             _mediator = mediator;
         }
@@ -98,10 +97,10 @@ namespace Services
             try
             {
                 var query = new GetPlaneByIdQuery(id);
-                var planeResponse = await _mediator.Send(query);
-                if (planeResponse != null)
+                var plane = await _mediator.Send(query);
+                if (plane != null)
                 {
-                    res.Data = planeResponse;
+                    res.Data = _mapper.Map<PlaneResponse>(plane);
                     res.Success = true;
                     message = "This is the plane of id " + id;
                 }  
@@ -126,22 +125,18 @@ namespace Services
         public async Task<MainResponse<PlaneResponse>> AddPlane(PlaneRequest planeRequest)
         {
             MainResponse<PlaneResponse> res = new();
-            var message = "Plane Created Successfully";
+            var message = "Plane Already Exists";
             try
-            { 
-                PlaneEntity plane = _mapper.Map<PlaneEntity>(planeRequest);
-                bool IsPlaneExistsBool = await IsPlaneExists(plane);
-                if (!IsPlaneExistsBool)
+            {
+                var query = new PlaneExistenceQuery(planeRequest);
+                var IsPlaneExists = await _mediator.Send(query);
+                
+                if(!IsPlaneExists)
                 {
-                    var createdPlane = await _unitOfWork.Planes.CreateAsync(plane);
-                    await _unitOfWork.Seats.GeneratePlaneSeats(createdPlane);
-
-                    res.Success = await _unitOfWork.CompleteAsync();
-                    res.Data = _mapper.Map<PlaneResponse>(createdPlane);
-                }
-                else
-                {
-                    message = "Plane Already Exists";
+                    var request = new CreatePlaneRequest(planeRequest);
+                    res.Data = await _mediator.Send(request);
+                    res.Success = true;
+                    message = "Plane Created Successfully";
                 }
             }
             catch (Exception ex)
@@ -165,24 +160,26 @@ namespace Services
         public async Task<MainResponse<PlaneResponse>> UpdatePlane(int id, PlaneRequest planeRequest)
         {
             MainResponse<PlaneResponse> res = new();
-            var message = "Plane Updated Successfully";
+            var message = "Informations provided corresponds to an existing plane";
             try
             {
-                var dbPlane = await _unitOfWork.Planes.FindByIdAsync(id);
-                bool IsPlaneExistsBool = await IsPlaneExists(_mapper.Map<PlaneEntity>(planeRequest));
-                if (dbPlane != null && !IsPlaneExistsBool)
+                var query = new PlaneExistenceQuery(planeRequest);
+                var IsPlaneExists = await _mediator.Send(query);
+                if (!IsPlaneExists)
                 {
-                    var createdPlane = await _unitOfWork.Planes.UpdateAsync(_mapper.Map(planeRequest, dbPlane));
-
-                    res.Success = await _unitOfWork.CompleteAsync();
-                    res.Data = _mapper.Map<PlaneResponse>(createdPlane);              
-                }
-                else 
-                {
-                    if (IsPlaneExistsBool) message = "Informations provided corresponds to an existing plane";
-                    if(dbPlane == null) message = "Plane Not Found";
-                }
-                
+                    var request = new UpdatePlaneRequest(id, planeRequest);
+                    var updatedPlaneResponse = await _mediator.Send(request);
+                    if (updatedPlaneResponse != null)
+                    {
+                        res.Data = updatedPlaneResponse;
+                        res.Success = true;
+                        message = "Plane Updated Successfully";
+                    }
+                    else
+                    {
+                        message = "Plane Not Found";
+                    }
+                }  
             }
             catch (Exception ex)
             {
@@ -204,20 +201,14 @@ namespace Services
         public async Task<MainResponse<bool>> DeletePlane(int id)
         {
             MainResponse<bool> res = new();
-            var message = "Plane Deleted Successfully";
+            var message = "Plane Not Found";
             try
             {
-                var dbPlane = await _unitOfWork.Planes.FindByIdAsync(id);
-                if (dbPlane != null)
+                var request = new DeletePlaneRequest(id);
+                if( await _mediator.Send(request))
                 {
-                    await _unitOfWork.Planes.DeleteAsync(dbPlane);
-
-                   res.Success = await _unitOfWork.CompleteAsync();
-                }
-                else
-                {
-                    message = "Plane Not Found";
-                    res.Data = false;
+                    message = "Plane Deleted Successfully";
+                    res.Success = true;
                 }
             }
             catch (Exception ex)
@@ -227,22 +218,6 @@ namespace Services
             }
             res.Message = message;
             return res;
-        }
-
-
-        /// <summary>
-        /// Checks if a plane with the same attributes as the provided plane exists in the database.
-        /// </summary>
-        /// <param name="plane">The plane entity to compare against existing planes.</param>
-        /// <returns cref="bool">
-        /// True if a plane matching the provided criteria exists in the database, otherwise false.
-        /// </returns>
-        public async Task<bool> IsPlaneExists(PlaneEntity plane)
-        {
-            var planesMatchingCriteria = await _unitOfWork.Planes.FindByConditionAsync(
-                                     p => p.Name == plane.Name && p.Model == plane.Model && p.Serial == plane.Serial);
-
-            return planesMatchingCriteria.Any();
         }
     }
 }
