@@ -19,7 +19,7 @@ namespace Services.Handlers.QueriesHandlers.Planes
         }
         public async Task<IEnumerable<PlaneResponse>> Handle(GetAvailablesPlanesQuery request, CancellationToken cancellationtoken)
         {
-            var planes = await _unitOfWork.Planes.FindAllAsync();
+            var planes = await _unitOfWork.Planes.FindAvailablePlanesAsync();
             return planes.Select(p => _mapper.Map<PlaneResponse>(p)).ToList();
         }
     }
