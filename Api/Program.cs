@@ -1,10 +1,12 @@
 using Api.Configuration;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 
 builder.Services.AddDatabaseConfiguration(builder.Configuration);
+builder.Services.AddHangfireConfiguration(builder.Configuration);
 builder.Services.AddAutoMapper();
 builder.Services.AddDependenciesInjection();
 
@@ -21,6 +23,10 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthorization();
+
+app.UseHangfireDashboard();
+app.MapHangfireDashboard("/hangfire");
+RecurringJob.AddOrUpdate(() => Console.WriteLine("Hello from hangfire"), "* * * * *");
 
 app.MapRazorPages();
 

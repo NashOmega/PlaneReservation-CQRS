@@ -23,17 +23,13 @@ namespace Services.Handlers.CommandsHandlers.Reservations
 
         public async Task<ReservationResponse?> Handle(AddReservationRequest request, CancellationToken cancellationToken)
         {
-            var reservation = _mapper.Map<ReservationEntity>(request.ReservationRequest);
-
-            var passengersRequest = new AddOrUpdatePassengersRequest(request.ReservationRequest.PassengerRequests);
-            reservation.Passengers = await _mediator.Send(passengersRequest);
-
-            reservation = await FilterPassengersList(reservation);
+            var reservation = await FilterPassengersList(_mapper.Map<ReservationEntity>(request.ReservationRequest));
 
             if (reservation.Passengers.Count != 0)
             {
                 reservation.Plane = request.Plane;
                 var createdReservation = await _unitOfWork.Reservations.CreateAsync(reservation);
+                await _unitOfWork.CompleteAsync();
 
                 await AffectSeats(createdReservation, request.Plane);
                 await _unitOfWork.CompleteAsync();
@@ -59,7 +55,6 @@ namespace Services.Handlers.CommandsHandlers.Reservations
             foreach (PassengerEntity passenger in reservation.Passengers)
             {
                 var dbPassenger = await _unitOfWork.Passengers.FindByEmail(passenger.Email);
-
                 if (dbPassenger != null && DoesPassengerHaveTheSameReservation(dbPassenger, reservation))
                     passengersToRemove.Add(passenger);
             }

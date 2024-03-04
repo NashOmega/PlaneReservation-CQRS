@@ -1,5 +1,6 @@
 ﻿using Core.Data;
 using Core.Interfaces.SeedDatabase;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Configuration
