@@ -3,7 +3,6 @@ using Core.Entities;
 using Core.Interfaces.Repository;
 using Core.Response;
 using MediatR;
-using Services.Commands.Passengers;
 using Services.Commands.Reservations;
 
 namespace Services.Handlers.CommandsHandlers.Reservations
