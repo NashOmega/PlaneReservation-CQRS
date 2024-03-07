@@ -3,9 +3,11 @@ using Core.Interfaces.Services;
 using Core.Queries.Planes;
 using Core.Request;
 using Core.Response;
+using Hangfire;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Services.Commands.Planes;
+using Services.Jobs.Interfaces;
 using Services.Queries.Planes;
 
 namespace Services
@@ -174,6 +176,11 @@ namespace Services
                         res.Data = updatedPlaneResponse;
                         res.Success = true;
                         message = "Plane Updated Successfully";
+
+                        //Delayed Jobs
+                        var jobId = BackgroundJob
+                            .Schedule<IMaintenanceService>(x => x.SyncRecords(), TimeSpan.FromSeconds(20));
+                        Console.WriteLine($"Job ${jobId}");
                     }
                     else
                     {
@@ -209,6 +216,15 @@ namespace Services
                 {
                     message = "Plane Deleted Successfully";
                     res.Success = true;
+                    RecurringJob.AddOrUpdate<IMerchService>(
+                        "suppression_merch_job", 
+                         x => x.DeleteMerch(id), 
+                         Cron.Minutely, 
+                         new RecurringJobOptions
+                         {
+                             TimeZone = TimeZoneInfo.Local,
+                         }
+                    );
                 }
             }
             catch (Exception ex)

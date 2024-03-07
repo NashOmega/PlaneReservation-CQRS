@@ -1,4 +1,5 @@
 using Api.Configuration;
+using Api.Configuration.Jobs;
 using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,14 +21,16 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseStaticFiles();
 
+
 app.UseRouting();
 
 app.UseAuthorization();
 
 app.UseHangfireDashboard();
 app.MapHangfireDashboard("/hangfire");
-RecurringJob.AddOrUpdate(() => Console.WriteLine("Hello from hangfire"), "* * * * *");
+//RecurringJob.AddOrUpdate(() => Console.WriteLine("Hello from hangfire"), "* * * * *");
 
 app.MapRazorPages();
+app.RunNotExecutedJobs();
 
 app.Run();

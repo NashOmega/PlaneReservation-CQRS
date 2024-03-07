@@ -2,8 +2,10 @@
 using Core.Entities;
 using Core.Interfaces.Repository;
 using Core.Response;
+using Hangfire;
 using MediatR;
 using Services.Commands.Reservations;
+using Services.Jobs.Interfaces;
 
 namespace Services.Handlers.CommandsHandlers.Reservations
 {
@@ -103,6 +105,5 @@ namespace Services.Handlers.CommandsHandlers.Reservations
             plane.AvailableSeats -= reservation.Passengers.Count;
             await _unitOfWork.Planes.UpdateAsync(plane);
         }
-
     }
 }

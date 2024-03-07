@@ -4,9 +4,11 @@ using Core.Interfaces.Services;
 using Core.Queries.Planes;
 using Core.Request;
 using Core.Response;
+using Hangfire;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Services.Commands.Reservations;
+using Services.Jobs.Interfaces;
 
 namespace Services
 {
@@ -106,6 +108,8 @@ namespace Services
                     res.Success = true;
                     res.Data = reservationResponse;
                     message = "Reservation Created Successfully";
+
+                    WelcomeEmailJob(reservationResponse);
                 }
             }
             catch (Exception ex)
@@ -186,6 +190,17 @@ namespace Services
             }
             res.Message = message;
             return res;
+        }
+
+        //Fire And Forget Job
+        public void WelcomeEmailJob(ReservationResponse reservationResponse)
+        {
+            foreach (PassengerResponse passenger in reservationResponse.PassengerResponses)
+            {
+                var jobId = BackgroundJob
+                    .Enqueue<IEmailService>(x => x.SendWelcomeEmail($"{passenger.Email}", $"{passenger.FirstName} {passenger.LastName}"));
+                Console.WriteLine($"Job ${jobId}");
+            }
         }
     }
 }

@@ -2,11 +2,11 @@
 using Core.Interfaces.Repository;
 using Core.Interfaces.SeedDatabase;
 using Core.Interfaces.Services;
-using MediatR;
 using Repository;
 using Services;
+using Services.Jobs;
+using Services.Jobs.Interfaces;
 using Services.Seed;
-using System;
 
 namespace Api.Configuration
 {
@@ -23,6 +23,12 @@ namespace Api.Configuration
 
             services.AddScoped<IInitSeedService, InitSeedService>();
             services.AddMediatR(Cfg => Cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies()));
+
+
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IMerchService, MerchService>();
+            services.AddScoped<IMaintenanceService, MaintenanceService>();
+            services.AddScoped<IVerificationService, VerificationService>();
         }
     }
 }
