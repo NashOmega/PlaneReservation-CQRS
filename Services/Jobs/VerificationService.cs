@@ -41,7 +41,7 @@ namespace Services.Jobs
                 }
                 var lastExecutionDate = jobData.LastExecution;
 
-                if (lastExecutionDate == null || lastExecutionDate.Value.IsManuallyTriggered)
+                if (lastExecutionDate == null)
                 {
                     return false;
                 }
