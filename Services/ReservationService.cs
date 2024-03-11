@@ -79,7 +79,7 @@ namespace Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error Occured: {ErrorMessage}", ex.Message);
+                _logger.LogError(ex, "{repo} An error Occured: {ErrorMessage}", typeof(ReservationService), ex.Message);
                 res.Message = ex.Message;
             }
             return res;
@@ -114,7 +114,7 @@ namespace Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error Occured: {ErrorMessage}", ex.Message);
+                _logger.LogError(ex, "{repo} An error Occured: {ErrorMessage}", typeof(ReservationService), ex.Message);
                 message = ex.Message;
             }
             res.Message = message;
@@ -185,7 +185,7 @@ namespace Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error Occured: {ErrorMessage}", ex.Message);
+                _logger.LogError(ex, "{repo} An error Occured: {ErrorMessage}", typeof(ReservationService), ex.Message);
                 message = ex.Message;
             }
             res.Message = message;
